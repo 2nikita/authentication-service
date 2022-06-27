@@ -25,16 +25,26 @@ def config(filename="database.ini", section="postgresql"):
 class Database:
     def __init__(self):
         db_conn = config()
-        self.conn = psycopg2.connect(db_conn["db_conn"])
-        self.cur = self.conn.cursor()
+        try:
+            self.conn = psycopg2.connect(db_conn["db_conn"])
+            self.cur = self.conn.cursor()
+        except Exception as error:
+            print("Oops! An exception has occured:", error)
+            print("Exception TYPE:", type(error))
 
-    def write_data(self, data: dict):
-        # TODO: how to insert hashed data? https://stackoverflow.com/questions/13683533/hash-a-column-in-postgres-using-sha-256
+    def write(self, data: dict) -> dict:
         query = f"""
-            INSERT INTO user_data(user_id, login_key, password_key, password_salt, created_on)
-            VALUES ("{data["user_id"]}", "{data["login_key"]}", "{data["password_key"]}", "{data["password_salt"]}", {data["created_on"]})
+            INSERT INTO user_data (user_id, login_key, password_key, password_salt, created_on)
+            VALUES ('{data["user_id"]}', '{data["login_key"]}', '{data["password_key"]}', '{data["password_salt"]}', TIMESTAMP '{data["created_on"]}');
         """
-        self.cur.execute(query)  # TODO: what if an error occurs?
+        try:
+            self.cur.execute(query)
+            self.conn.commit()
+            return {"success": True}
+        except Exception as error:
+            print("Oops! An exception has occured:", error)
+            print("Exception TYPE:", type(error))
+            return {"success": False}
 
     def close(self):
         self.cur.close()

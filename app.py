@@ -1,10 +1,12 @@
 from flask import Flask, request
 import hashlib
 import os
-from uuid import uuid1
+from uuid import uuid4
 from datetime import datetime
 
 from database import Database
+
+DB = Database()
 
 # based on https://nitratine.net/blog/post/how-to-hash-passwords-in-python/
 def hash_password(password: str):
@@ -15,7 +17,10 @@ def hash_password(password: str):
         salt=salt,
         iterations=100000,
     )
-    return salt, key
+    # convert from byte to hexadecimal format: reverse - bytes.fromhex('deadbeef')
+    salt_hex = salt.hex()
+    key_hex = key.hex()
+    return salt_hex, key_hex
 
 
 app = Flask(__name__)
@@ -28,9 +33,9 @@ def create_user():
     password = request.form.get("password")
 
     # hash user login and password
-    login_key = hashlib.sha1(bytes(login, "utf-8")).digest()
+    login_key = hashlib.sha1(bytes(login, "utf-8")).hexdigest()
     password_salt, password_key = hash_password(password=password)
-    used_id = str(uuid1())
+    used_id = str(uuid4())
 
     # add data to dict
     user_data = {
@@ -40,10 +45,13 @@ def create_user():
         "user_id": used_id,
         "created_on": datetime.now(),
     }
-    import pdb
+    response = DB.write(data=user_data)
+    return response
 
-    pdb.set_trace()
-    return login
+
+@app.route("/verify_user", methods=["POST"])
+def verify_user():
+    pass
 
 
 # run app

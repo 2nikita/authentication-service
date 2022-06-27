@@ -6,3 +6,5 @@ CREATE TABLE user_data (
     password_salt VARCHAR ( 100 ) UNIQUE NOT NULL,
     created_on TIMESTAMP NOT NULL
 );
+
+GRANT ALL PRIVILEGES ON TABLE user_data TO myuser;
