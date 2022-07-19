@@ -33,7 +33,7 @@ def create_user():
     password = request.form.get("password")
 
     # hash user login and password
-    login_key = hashlib.sha1(bytes(login, "utf-8")).hexdigest()
+    login_key = hashlib.sha1(login.encode("utf-8")).hexdigest()
     password_salt, password_key = hash_password(password=password)
     used_id = str(uuid4())
 
@@ -49,9 +49,9 @@ def create_user():
     return response
 
 
-@app.route("/verify_user", methods=["POST"])
-def verify_user():
-    pass
+@app.route("/authenticate_user", methods=["GET"])
+def authenticate_user():
+    login = request.form.get("login")
 
 
 # run app
