@@ -23,6 +23,12 @@ def hash_password(password: str):
     return salt_hex, key_hex
 
 
+def generate_password(hashed_login: str):
+    # get the salt from DB to generate password
+    # then compare it with the one sent when authenticating
+    pass
+
+
 app = Flask(__name__)
 
 
@@ -36,7 +42,9 @@ def create_user():
     login_key = hashlib.sha1(login.encode("utf-8")).hexdigest()
     password_salt, password_key = hash_password(password=password)
     used_id = str(uuid4())
+    import pdb
 
+    pdb.set_trace()
     # add data to dict
     user_data = {
         "login_key": login_key,
