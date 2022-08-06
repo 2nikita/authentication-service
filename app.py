@@ -5,6 +5,7 @@ from uuid import uuid4
 from datetime import datetime
 
 from database import Database
+from authentication import Authentication
 
 DB = Database()
 
@@ -23,10 +24,18 @@ def hash_password(password: str):
     return salt_hex, key_hex
 
 
-def generate_password(hashed_login: str):
+def generate_password(salt: str, password: str):
     # get the salt from DB to generate password
     # then compare it with the one sent when authenticating
-    pass
+    byte_salt = bytes.fromhex(salt)
+    key = hashlib.pbkdf2_hmac(
+        hash_name="sha256",
+        password=password.encode("utf-8"),
+        salt=byte_salt,
+        iterations=100000,
+    )
+    key_hex = key.hex()
+    return key_hex
 
 
 app = Flask(__name__)
@@ -42,9 +51,7 @@ def create_user():
     login_key = hashlib.sha1(login.encode("utf-8")).hexdigest()
     password_salt, password_key = hash_password(password=password)
     used_id = str(uuid4())
-    import pdb
 
-    pdb.set_trace()
     # add data to dict
     user_data = {
         "login_key": login_key,
@@ -59,7 +66,22 @@ def create_user():
 
 @app.route("/authenticate_user", methods=["GET"])
 def authenticate_user():
-    login = request.form.get("login")
+    login = request.headers.get("login")
+    password = request.headers.get("password")
+
+    # hash user login and get password data from DB
+    login_key = hashlib.sha1(login.encode("utf-8")).hexdigest()
+    data = DB.get_user_data(user_login=login_key)
+    hashed_password = generate_password(
+        salt=data["password_salt"], password=password
+    )
+    if data["password_key"] == hashed_password:
+        authentication = Authentication(user_id=data["user_id"])
+        jwt_token = authentication.generate_token()
+
+        return jwt_token
+    else:
+        return {"success": False}
 
 
 # run app

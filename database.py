@@ -37,6 +37,7 @@ class Database:
             INSERT INTO user_data (user_id, login_key, password_key, password_salt, created_on)
             VALUES ('{data["user_id"]}', '{data["login_key"]}', '{data["password_key"]}', '{data["password_salt"]}', TIMESTAMP '{data["created_on"]}');
         """
+
         try:
             self.cur.execute(query)
             self.conn.commit()
@@ -45,6 +46,22 @@ class Database:
             print("Oops! An exception has occured:", error)
             print("Exception TYPE:", type(error))
             return {"success": False}
+
+    def get_user_data(self, user_login: str):
+        query = "SELECT user_id, password_key, password_salt FROM user_data"
+        f"WHERE login_key = '{user_login}';"
+
+        try:
+            self.cur.execute(query)
+            result = self.cur.fetchall()  # TODO: make sure that we get result
+            return {
+                "user_id": result[0][0],
+                "password_key": result[0][1],
+                "password_salt": result[0][2],
+            }
+        except Exception as error:
+            print("Oops! An exception has occured:", error)
+            print("Exception TYPE:", type(error))
 
     def close(self):
         self.cur.close()
