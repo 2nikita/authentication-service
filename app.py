@@ -7,8 +7,6 @@ from datetime import datetime
 from database import Database
 from authentication import Authentication
 
-DB = Database()
-
 # based on https://nitratine.net/blog/post/how-to-hash-passwords-in-python/
 def hash_password(password: str):
     salt = os.urandom(32)
@@ -39,6 +37,7 @@ def generate_password(salt: str, password: str):
 
 
 app = Flask(__name__)
+# TODO: use middleware - https://medium.com/swlh/creating-middlewares-with-python-flask-166bd03f2fd4
 
 
 @app.route("/create_user", methods=["POST"])
@@ -71,7 +70,10 @@ def authenticate_user():
 
     # hash user login and get password data from DB
     login_key = hashlib.sha1(login.encode("utf-8")).hexdigest()
-    data = DB.get_user_data(user_login=login_key)
+    import pdb
+
+    pdb.set_trace()
+    data = Database().get_user_data(user_login=login_key)
     hashed_password = generate_password(
         salt=data["password_salt"], password=password
     )

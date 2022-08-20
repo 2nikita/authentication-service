@@ -13,5 +13,7 @@ class Authentication:
         self.exp = self.iat + EXPIRATION_TIMEFRAME_SC
 
     def generate_token(self):
-        encoded_jwt = jwt.encode(self.__dict__, JWT_SECRET, algorithm="HS256")
+        encoded_jwt = jwt.encode(
+            payload=self.__dict__, key=JWT_SECRET, algorithm="HS256"
+        )
         return encoded_jwt

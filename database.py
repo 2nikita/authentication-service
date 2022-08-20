@@ -22,7 +22,17 @@ def config(filename="database.ini", section="postgresql"):
     return db
 
 
-class Database:
+class SingletonMeta(type):
+    _instances = {}
+
+    def __call__(cls, *args, **kwargs):
+        if cls not in cls._instances:
+            instance = super().__call__(*args, **kwargs)
+            cls._instances[cls] = instance
+        return cls._instances[cls]
+
+
+class Database(metaclass=SingletonMeta):
     def __init__(self):
         db_conn = config()
         try:
@@ -32,6 +42,8 @@ class Database:
             print("Oops! An exception has occured:", error)
             print("Exception TYPE:", type(error))
 
+    # only leave stuff for opening and clossing connection
+    # these functions will be in a model for user data (?)
     def write(self, data: dict) -> dict:
         query = f"""
             INSERT INTO user_data (user_id, login_key, password_key, password_salt, created_on)
