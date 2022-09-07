@@ -1,24 +1,7 @@
 from flask import Flask, request
-import hashlib
 
 from database import Database
-from authentication import Authentication
 from user import User
-
-
-def generate_password(salt: str, password: str):
-    # get the salt from DB to generate password
-    # then compare it with the one sent when authenticating
-    byte_salt = bytes.fromhex(salt)
-    key = hashlib.pbkdf2_hmac(
-        hash_name="sha256",
-        password=password.encode("utf-8"),
-        salt=byte_salt,
-        iterations=100000,
-    )
-    key_hex = key.hex()
-    return key_hex
-
 
 app = Flask(__name__)
 # TODO: use middleware - https://medium.com/swlh/creating-middlewares-with-python-flask-166bd03f2fd4
@@ -32,8 +15,8 @@ def create_user():
 
     # write user data to db
     # TODO: handle posssible errors - duplicated login, etc.
-    user = User(login=login, password=password)
-    response = user.write(db_instance=Database())
+    user = User(login=login, password=password, db_instance=Database())
+    response = user.write()
 
     return response
 
@@ -42,23 +25,10 @@ def create_user():
 def authenticate_user():
     login = request.headers.get("login")
     password = request.headers.get("password")
-
-    # hash user login and get password data from DB
-    login_key = hashlib.sha1(login.encode("utf-8")).hexdigest()
-    import pdb
-
-    pdb.set_trace()
-    data = Database().get_user_data(user_login=login_key)
-    hashed_password = generate_password(
-        salt=data["password_salt"], password=password
-    )
-    if data["password_key"] == hashed_password:
-        authentication = Authentication(user_id=data["user_id"])
-        jwt_token = authentication.generate_token()
-
-        return jwt_token
-    else:
-        return {"success": False}
+    user = User(login=login, password=password, db_instance=Database())
+    # get JWT if user data is valid
+    response = user.verify()
+    return response
 
 
 # run app
