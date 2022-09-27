@@ -50,11 +50,11 @@ class Database(metaclass=SingletonMeta):
                 data = self.cur.fetchall()
                 return data
             else:
-                self.conn.commit()
                 return {"success": True}
         except Exception as error:
             print("Oops! An exception has occured:", error)
             print("Exception TYPE:", type(error))
+            self.conn.rollback()
             return {"success": False}
 
     def close(self):
