@@ -1,5 +1,4 @@
 # User model
-from ctypes import Union
 import hashlib
 import os
 from uuid import uuid4
@@ -48,9 +47,9 @@ class User:
 
             if password_key == hashed_password:
                 authentication = Authentication(user_id=user_id)
-                jwt_token = authentication.generate_token()
+                tokens = authentication.generate_tokens()
 
-                return jwt_token
+                return tokens
             else:
                 return {"success": False}
         else:

@@ -3,9 +3,12 @@ import jwt
 from flask import request, redirect
 from database import Database
 from functools import wraps
+from uuid import uuid4
 
-EXPIRATION_TIMEFRAME_SC = 1800  # TODO: set it as env var?
-JWT_SECRET = "kaef"  # TODO: set it as env var?
+EXPIRATION_TIMEFRAME_AT = 1800  # TODO: set it as env var
+EXPIRATION_TIMEFRAME_RT = 86400  # TODO: set it as env var
+ACCESS_TOKEN_SECRET = "kaef"  # TODO: set it as env var
+REFRESH_TOKEN_SECRET = "antikaef"  # TODO: set it as env var
 
 
 class Authentication:
@@ -13,13 +16,14 @@ class Authentication:
         self.iss = "Authentication Server"
         self.iat = datetime.now().timestamp()
         self.sub = user_id
-        self.exp = self.iat + EXPIRATION_TIMEFRAME_SC
+        self.exp = self.iat + EXPIRATION_TIMEFRAME_AT
 
-    def generate_token(self):
-        encoded_jwt = jwt.encode(
-            payload=self.__dict__, key=JWT_SECRET, algorithm="HS256"
+    def generate_tokens(self) -> dict:
+        access_token = jwt.encode(
+            payload=self.__dict__, key=ACCESS_TOKEN_SECRET, algorithm="HS256"
         )
-        return encoded_jwt
+        refresh_token = str(uuid4())  # TODO: set it as JWT
+        return {"access_token": access_token, "refresh_token": refresh_token}
 
 
 def verify_token(route):
