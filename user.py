@@ -5,11 +5,21 @@ from uuid import uuid4
 from datetime import datetime
 
 from authentication import Authentication
+from database import Database
 
 
 class User:
-    def __init__(self, db_instance):
-        self.db_instance = db_instance
+    def __init__(self):
+        self.db_instance = Database()
+
+    def is_user(self, id: str) -> bool:
+        """Check if a user exists in the database"""
+        query = f"SELECT COUNT(*) FROM user_data WHERE user_id = '{id}';"
+        check_user = self.db_instance.execute(query, result=True)
+        if check_user[0][0] == 1:
+            return True
+        else:
+            return False
 
     def write(self, login: str, password: str):
         """Write new user to the database."""
@@ -26,7 +36,7 @@ class User:
 
         return response
 
-    def verify(self, login: str, password: str):
+    def verify(self, login: str, password: str) -> dict[str, bool]:
         """Verify user data and, if it's valid, send JWT."""
         login_key = hashlib.sha1(login.encode("utf-8")).hexdigest()
         query = (
