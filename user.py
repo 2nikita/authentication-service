@@ -16,12 +16,11 @@ class User:
         """Check if a user exists in the database"""
         query = f"SELECT COUNT(*) FROM user_data WHERE user_id = '{id}';"
         check_user = self.db_instance.execute(query, result=True)
-        if check_user[0][0] == 1:
-            return True
-        else:
-            return False
+        is_user = True if check_user[0][0] == 1 else False
 
-    def write(self, login: str, password: str):
+        return is_user
+
+    def write(self, login: str, password: str) -> dict[str, bool]:
         """Write new user to the database."""
         user_id = str(uuid4())
         created_on = datetime.now()
@@ -67,7 +66,7 @@ class User:
 
     # based on https://nitratine.net/blog/post/how-to-hash-passwords-in-python/
     @staticmethod
-    def _hash_password(password: str):
+    def _hash_password(password: str) -> tuple[str, str]:
         """Hash unencrypted password."""
         salt = os.urandom(32)
         key = hashlib.pbkdf2_hmac(

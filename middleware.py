@@ -1,9 +1,10 @@
 from flask import request, abort, make_response
 from datetime import datetime
 import jwt
+from functools import wraps
+
 from user import User
 from authentication import Authentication
-from functools import wraps
 
 EXPIRATION_TIMEFRAME_AT = 1800  # TODO: set it as env var
 EXPIRATION_TIMEFRAME_RT = 86400  # TODO: set it as env var
@@ -49,19 +50,23 @@ def verify_token(route):
                     return {
                         "message": "Authentication failed: user doesn't exist."
                     }, 500
-                authentication = Authentication(user_id=payload_rt["sub"])
+
                 print("Generate new tokens")
+                authentication = Authentication(user_id=payload_rt["sub"])
                 tokens = authentication.generate_tokens()
                 print(f"Generated tokens: {tokens}")
+
                 response = make_response()
                 response.set_cookie("access_token", tokens["access_token"])
                 response.set_cookie("refresh_token", tokens["refresh_token"])
+
                 return route(response)
         else:
             if not check_user(id=payload_at["sub"]):
                 return {
                     "message": "Authentication failed: user doesn't exist."
                 }, 500
+
             return route(make_response())
 
     return verify

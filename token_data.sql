@@ -1,4 +1,4 @@
--- table for refresh tokens
+-- table for refresh tokens: not needed at the moment
 CREATE TABLE refresh_tokens (
 	user_id VARCHAR ( 100 ) UNIQUE NOT NULL,
 	token_id VARCHAR ( 100 ) UNIQUE NOT NULL,

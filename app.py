@@ -1,10 +1,10 @@
 from flask import Flask, request, make_response
 import json
+
 from user import User
 from middleware import verify_token
 
 app = Flask(__name__)
-# TODO: use middleware - https://medium.com/swlh/creating-middlewares-with-python-flask-166bd03f2fd4
 
 
 @app.route("/create_user", methods=["POST"])
