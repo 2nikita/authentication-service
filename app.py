@@ -1,5 +1,5 @@
 from flask import Flask, request, make_response
-
+import json
 from user import User
 from middleware import verify_token
 
@@ -38,8 +38,9 @@ def authenticate_user():
 
 @app.route("/create_ad", methods=["POST"])
 @verify_token
-def create_ad():
-    return {"Do smth": "blabla"}
+def create_ad(response):
+    response.set_data(json.dumps({"success": True}))
+    return response
 
 
 # run app

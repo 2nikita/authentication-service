@@ -56,13 +56,13 @@ def verify_token(route):
                 response = make_response()
                 response.set_cookie("access_token", tokens["access_token"])
                 response.set_cookie("refresh_token", tokens["refresh_token"])
-                return response  # route()
+                return route(response)
         else:
             if not check_user(id=payload_at["sub"]):
                 return {
                     "message": "Authentication failed: user doesn't exist."
                 }, 500
-            return route()
+            return route(make_response())
 
     return verify
 
